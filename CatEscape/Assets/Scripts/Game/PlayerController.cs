@@ -1,5 +1,4 @@
-﻿using System;
-using CatEscape.Network;
+﻿using CatEscape.Network;
 using UnityEngine;
 
 namespace CatEscape.Game
@@ -11,8 +10,6 @@ namespace CatEscape.Game
         [SerializeField] private float _speed;
         private Player _player;
 
-        private GamePacket _movePacket = new GamePacket {Type = PacketType.Move};
-
         private void Awake()
         {
             _player = GetComponent<Player>();
@@ -20,21 +17,30 @@ namespace CatEscape.Game
 
         private void Update()
         {
-            if (!_player.IsHost)
+            if (!_player.IsMe)
             {
                 return;
             }
 
-            var xAxis = Input.GetAxis("Horizontal");
+            var xAxis = 0f;
+
+            if (Input.GetKey(KeyCode.LeftArrow))
+            {
+                xAxis -= 1f;
+            }
+
+            if (Input.GetKey(KeyCode.RightArrow))
+            {
+                xAxis += 1f;
+            }
 
             if (xAxis != 0)
             {
-                var translatedPos = new Vector2(xAxis * _speed * Time.deltaTime, transform.position.y);
+                var translatedPos = new Vector2(transform.position.x + (xAxis * _speed * Time.deltaTime), transform.position.y);
                 translatedPos.x = Mathf.Clamp(translatedPos.x, -_mapOffset, _mapOffset);
-                transform.position = translatedPos;
-                
-                _player.SyncData(ref _movePacket);
-                NetworkManager.SendPacket(_movePacket);
+
+                _player.Position = translatedPos;
+                NetworkManager.SendPacket(_player.CreatePacket(PacketType.Move));
             }
         }
     }

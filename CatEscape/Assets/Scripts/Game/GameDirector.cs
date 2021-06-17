@@ -20,16 +20,6 @@ namespace CatEscape.Game
             _players = new Dictionary<int, Player>();
         }
 
-        private void Start()
-        {
-            var packet = new InfoPacket
-            {
-                Type = PacketType.Ready,
-                Id = NetworkManager.Id
-            };
-            NetworkManager.SendPacket(packet);
-        }
-
         private void Update()
         {
             if (NetworkManager.TryGetNextPacket(out var packet))
@@ -42,22 +32,7 @@ namespace CatEscape.Game
         {
             if (packet.Type == PacketType.PlayerJoin)
             {
-                try
-                {
-                    var isMe = packet.Id == NetworkManager.Id;
-                    var createdPlayer = CreatePlayerInstance(isMe, packet.IsHost, packet.Id, packet.Name);
-                    _players.Add(packet.Id, createdPlayer);
-
-                    if (createdPlayer.IsMe)
-                    {
-                        _me = createdPlayer;
-                    }
-                }
-                catch (Exception e)
-                {
-                    Debug.LogException(e);
-                }
-
+                HandlePlayerJoin(packet);
                 return;
             }
 
@@ -66,11 +41,36 @@ namespace CatEscape.Game
                 return;
             }
 
+            if (packet.Type == PacketType.Disconnect)
+            {
+                if (_players.TryGetValue(packet.Id, out var removedPlayer) && _players.Remove(packet.Id))
+                {
+                    Destroy(removedPlayer.gameObject);
+                }
+            }
+
             if (packet is GamePacket gamePacket)
             {
-                targetPlayer.SyncData(gamePacket);
+                targetPlayer.Sync(gamePacket);
+            }
+        }
 
-                // todo
+        private void HandlePlayerJoin(IPacket packet)
+        {
+            try
+            {
+                var isMe = packet.Id == NetworkManager.Id;
+                var createdPlayer = CreatePlayerInstance(isMe, packet.IsHost, packet.Id, packet.Name);
+                _players.Add(packet.Id, createdPlayer);
+
+                if (createdPlayer.IsMe)
+                {
+                    _me = createdPlayer;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
             }
         }
 
@@ -93,6 +93,7 @@ namespace CatEscape.Game
             }
 
             var player = Instantiate(_playerPrefab).GetComponent<Player>();
+            player.gameObject.name = playerName;
             player.IsMe = isMe;
             player.IsHost = isHost;
             player.Id = playerId;

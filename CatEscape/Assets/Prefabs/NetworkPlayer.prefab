@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 5296455044593515554}
   - component: {fileID: 4938816042999210242}
   - component: {fileID: 5776955761033623000}
-  - component: {fileID: 5296455044593515564}
+  - component: {fileID: 286624074306986048}
+  - component: {fileID: 1481571923742842303}
   m_Layer: 0
   m_Name: NetworkPlayer
   m_TagString: Player
@@ -133,7 +134,19 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 0
---- !u!114 &5296455044593515564
+--- !u!114 &286624074306986048
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5296455044593515555}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80ebe8656cbb4f58adf5e8c4e0d4fe4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1481571923742842303
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

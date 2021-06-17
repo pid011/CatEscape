@@ -86,26 +86,14 @@ namespace CatEscape.Server
         Reply,
     }
 
-    [Union(0, typeof(InfoPacket))]
-    [Union(1, typeof(GamePacket))]
-    [Union(2, typeof(ReplyPacket))]
-    [Union(3, typeof(CountdownPacket))]
-    [Union(4, typeof(TimerPacket))]
+    [Union(0, typeof(GamePacket))]
+    [Union(1, typeof(ReplyPacket))]
     public interface IPacket
     {
         public PacketType Type { get; set; }
         public int Id { get; set; }
         public string Name { get; set; }
         public bool IsHost { get; set; }
-    }
-
-    [MessagePackObject]
-    public class InfoPacket : IPacket
-    {
-        [Key(0)] public PacketType Type { get; set; }
-        [Key(1)] public int Id { get; set; }
-        [Key(2)] public string Name { get; set; }
-        [Key(3)] public bool IsHost { get; set; }
     }
 
     [MessagePackObject]
@@ -150,36 +138,6 @@ namespace CatEscape.Server
         public ReplyPacket()
         {
             Type = PacketType.Reply;
-        }
-    }
-
-    [MessagePackObject]
-    public class CountdownPacket : IPacket
-    {
-        [Key(0)] public PacketType Type { get; set; }
-        [Key(1)] public int Id { get; set; }
-        [Key(2)] public string Name { get; set; }
-        [Key(3)] public bool IsHost { get; set; }
-        [Key(4)] public int Countdown { get; set; }
-
-        public CountdownPacket()
-        {
-            Type = PacketType.CountDownBeforeStart;
-        }
-    }
-
-    [MessagePackObject]
-    public class TimerPacket : IPacket
-    {
-        [Key(0)] public PacketType Type { get; set; }
-        [Key(1)] public int Id { get; set; }
-        [Key(2)] public string Name { get; set; }
-        [Key(4)] public bool IsHost { get; set; }
-        [Key(5)] public int Time { get; set; }
-
-        public TimerPacket()
-        {
-            Type = PacketType.Timer;
         }
     }
 }

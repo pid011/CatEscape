@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -17,7 +18,7 @@ namespace CatEscape.Server
         private readonly UdpClient _server;
         private readonly ConcurrentDictionary<int, ServerPlayer> _players = new();
         private readonly ConcurrentQueue<(IPEndPoint, IPacket)> _packets = new();
-        private readonly object _socketLock = new();
+        // private readonly object _socketLock = new();
 
         public event EventHandler<PlayerEventArgs> PlayerJoin;
         public event EventHandler<PlayerEventArgs> PlayerDisconnect;
@@ -51,39 +52,12 @@ namespace CatEscape.Server
 
                 if (receivedPacket.Type == PacketType.Connect)
                 {
-                    var newPlayer = new ServerPlayer(receivedPacket.Id, receivedPacket.Name, sender);
-                    var reply = new ReplyPacket();
-
-                    if (_players.Count == MaxPlayers)
-                    {
-                        reply.Reason = ReplyPacket.Reasons.ServerIsFull;
-                    }
-                    else if (!_players.TryAdd(newPlayer.Id, newPlayer))
-                    {
-                        reply.Reason = ReplyPacket.Reasons.NameOfPlayerIsAlreadyConnected;
-                    }
-                    else
-                    {
-                        if (_players.Count == 1)
-                        {
-                            newPlayer.IsHost = true;
-                        }
-
-                        reply.Result = true;
-                        reply.Reason = ReplyPacket.Reasons.None;
-                        Log.Information(
-                            $"Connected player: endpoint - {newPlayer.RemoteEndPoint}, id - {newPlayer.Id}, name: {newPlayer.Name}");
-                    }
-
-                    SendPacket(newPlayer.RemoteEndPoint, reply);
+                    HandleConnect(receivedPacket, sender);
+                    continue;
                 }
-                else if (_players.TryGetValue(receivedPacket.Id, out var targetPlayer))
-                {
-                    if (receivedPacket is GamePacket gamePacket)
-                    {
-                        targetPlayer.SyncData(gamePacket);
-                    }
 
+                if (_players.TryGetValue(receivedPacket.Id, out var targetPlayer))
+                {
                     if (receivedPacket.Type == PacketType.CheckSignal)
                     {
                         targetPlayer.LastResponded = DateTime.Now;
@@ -92,49 +66,83 @@ namespace CatEscape.Server
 
                     if (receivedPacket.Type == PacketType.Disconnect)
                     {
-                        if (!_players.TryRemove(receivedPacket.Id, out var removedPlayer))
-                        {
-                            continue;
-                        }
-                        var disconnectPacket = new InfoPacket
-                        {
-                            Type = PacketType.Disconnect,
-                            Id = removedPlayer.Id
-                        };
-
-                        SendPacketToAll(disconnectPacket);
-                        Log.Information(
-                            $"Disconnected player: endpoint - {removedPlayer.RemoteEndPoint}, id - {removedPlayer.Id}, name: {removedPlayer.Name}");
+                        HandleDisconnect(receivedPacket);
+                        continue;
                     }
 
-                    if (receivedPacket.Type == PacketType.Ready)
+                    if (receivedPacket is GamePacket gamePacket)
                     {
-                        foreach (var (id, player) in _players)
-                        {
-                            SendPacket(targetPlayer.RemoteEndPoint, new InfoPacket
-                            {
-                                Type = PacketType.PlayerJoin,
-                                Id = player.Id,
-                                Name = player.Name,
-                                IsHost = player.IsHost
-                            });
-                        }
-
-                        SendPacketToAll(new InfoPacket
-                        {
-                            Type = PacketType.PlayerJoin,
-                            Id = targetPlayer.Id,
-                            Name = targetPlayer.Name,
-                            IsHost = targetPlayer.IsHost
-                        }, excludeId: targetPlayer.Id);
-
-                        continue;
+                        targetPlayer.Sync(gamePacket);
                     }
 
                     SendPacketToAll(receivedPacket, isEcho: true);
                     targetPlayer.LastResponded = DateTime.Now;
                 }
             }
+        }
+
+        private void HandleConnect(IPacket receivedPacket, IPEndPoint sender)
+        {
+            var newPlayer = new ServerPlayer(receivedPacket.Id, receivedPacket.Name, sender)
+            {
+                MaxHp = 100,
+                Hp = 100
+            };
+
+            var reply = new ReplyPacket();
+
+            if (_players.Count == MaxPlayers)
+            {
+                reply.Reason = ReplyPacket.Reasons.ServerIsFull;
+            }
+            else if (!_players.TryAdd(newPlayer.Id, newPlayer))
+            {
+                reply.Reason = ReplyPacket.Reasons.NameOfPlayerIsAlreadyConnected;
+            }
+            else
+            {
+                if (_players.Count == 1)
+                {
+                    newPlayer.IsHost = true;
+                }
+
+                reply.Result = true;
+                reply.Reason = ReplyPacket.Reasons.None;
+                Log.Information(
+                    $"Connected player: endpoint - {newPlayer.RemoteEndPoint}, id - {newPlayer.Id}, name: {newPlayer.Name}");
+            }
+
+            SendPacket(newPlayer.RemoteEndPoint, reply);
+            foreach (var (_, player) in _players)
+            {
+                SendPacket(newPlayer.RemoteEndPoint, player.CreatePacket(PacketType.PlayerJoin));
+            }
+            SendPacketToAll(newPlayer.CreatePacket(PacketType.PlayerJoin), excludeId: newPlayer.Id);
+        }
+
+        private void HandleDisconnect(IPacket receivedPacket)
+        {
+            if (!_players.TryRemove(receivedPacket.Id, out var removedPlayer))
+            {
+                return;
+            }
+            var disconnectPacket = removedPlayer.CreatePacket(PacketType.Disconnect);
+
+            if (removedPlayer.IsHost)
+            {
+                try
+                {
+                    var nextHost = _players.First();
+                    nextHost.Value.IsHost = true;
+                }
+                catch
+                {
+                }
+            }
+
+            SendPacketToAll(disconnectPacket, isEcho: true);
+            Log.Information(
+                $"Disconnected player: endpoint - {removedPlayer.RemoteEndPoint}, id - {removedPlayer.Id}, name: {removedPlayer.Name}");
         }
 
         private async Task SendPacketsInQueueAsync()
@@ -171,13 +179,9 @@ namespace CatEscape.Server
 
                     if (_players.TryRemove(id, out var removedPlayer))
                     {
-                        var packet = new InfoPacket
-                        {
-                            Type = PacketType.Disconnect,
-                            Id = removedPlayer.Id
-                        };
+                        var packet = removedPlayer.CreatePacket(PacketType.Disconnect);
 
-                        SendPacketToAll(packet);
+                        SendPacketToAll(packet, isEcho: true);
                         Log.Information($"Timeout player: endpoint - {removedPlayer.RemoteEndPoint}, id - {removedPlayer.Id}, name: {removedPlayer.Name}");
                     }
                 }
@@ -191,7 +195,7 @@ namespace CatEscape.Server
             _packets.Enqueue((ep, packet));
         }
 
-        public void SendPacketToAll(IPacket packet, bool isEcho = false, int excludeId = 0)
+        public void SendPacketToAll(IPacket packet, bool isEcho = true, int excludeId = 0)
         {
             foreach (var (id, player) in _players)
             {

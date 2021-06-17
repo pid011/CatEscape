@@ -23,24 +23,27 @@ namespace CatEscape.Server
             LastResponded = DateTime.Now;
         }
 
-        public void GetData(ref GamePacket packet)
-        {
-            packet.Id = Id;
-            packet.Name = Name;
-            packet.MaxHp = MaxHp;
-            packet.Hp = Hp;
-            packet.Position = Position;
-            packet.Role = Role;
-            packet.IsHost = IsHost;
-        }
-
-        public void SyncData(GamePacket packet)
+        public void Sync(GamePacket packet)
         {
             MaxHp = packet.MaxHp;
             Hp = packet.Hp;
             Position = packet.Position;
             Role = packet.Role;
-            IsHost = packet.IsHost;
+        }
+
+        public GamePacket CreatePacket(PacketType type)
+        {
+            return new GamePacket
+            {
+                Type = type,
+                Id = Id,
+                Name = Name,
+                IsHost = IsHost,
+                MaxHp = MaxHp,
+                Hp = Hp,
+                Position = Position,
+                Role = Role
+            };
         }
     }
 }

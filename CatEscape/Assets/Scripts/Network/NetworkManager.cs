@@ -10,21 +10,11 @@ namespace CatEscape.Network
 {
     public sealed class NetworkManager : Singleton<NetworkManagerComponent>
     {
-        public static bool IsConnected { get; private set; }
-        public static int Id { get; private set; }
-        public static string Name { get; private set; }
-        public static IPEndPoint ServerEndPoint { get; private set; }
+        public static bool IsConnected => Instance.IsConnected;
+        public static int Id => Instance.Id;
+        public static string Name => Instance.Name;
+        public static IPEndPoint ServerEndPoint => Instance.ServerEndPoint;
 
-        /// <summary>
-        /// 서버에 연결을 시도합니다.
-        /// </summary>
-        /// <param name="address">서버 주소</param>
-        /// <param name="port">서버 포트</param>
-        /// <param name="name">게임에서 사용할 이름</param>
-        /// <returns></returns>
-        /// <exception cref="MessagePackSerializationException"></exception>
-        /// <exception cref="TimeoutException"/>
-        /// <exception cref="SocketException"/>
         public static async Task ConnectToServerAsync(string address, int port, string name)
         {
             if (string.IsNullOrEmpty(address))
@@ -42,18 +32,18 @@ namespace CatEscape.Network
             }
 
             var serverEp = new IPEndPoint(IPAddress.Parse(address), port);
-
-            var packet = new InfoPacket
-            {
-                Type = PacketType.Connect,
-                Id = name.GetHashCode(),
-                Name = name
-            };
+            var newName = name;
+            var newId = name.GetHashCode();
 
             var client = new UdpClient();
             try
             {
-                var packetBuffer = MessagePackSerializer.Serialize((IPacket)packet);
+                var packetBuffer = MessagePackSerializer.Serialize<IPacket>(new GamePacket
+                {
+                    Type = PacketType.Connect,
+                    Id = newId,
+                    Name = newName
+                });
                 await client.SendAsync(packetBuffer, packetBuffer.Length, serverEp);
 
                 Debug.Log($"Client LocalEndPoint: {client.Client.LocalEndPoint}");
@@ -75,21 +65,19 @@ namespace CatEscape.Network
 
                 if (!replyPacket.Result)
                 {
-                    IsConnected = false;
                     throw new ConnectionFailException(replyPacket.Reason);
                 }
                 client.Connect(serverEp);
 
-                Id = packet.Id;
-                Name = packet.Name;
-                ServerEndPoint = serverEp;
-                Instance.Client = client;
-
-                IsConnected = true;
+                if (!Instance.Init(client, newId, newName))
+                {
+                    throw new Exception("NetworkManager 초기화에 실패했습니다.");
+                }
+                Instance.StartConnection();
             }
             finally
             {
-                if (Instance.Client is null)
+                if (!IsConnected)
                 {
                     client.Close();
                 }

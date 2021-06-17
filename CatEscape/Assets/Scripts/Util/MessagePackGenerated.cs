@@ -49,18 +49,15 @@ namespace MessagePack.Resolvers
 
         static GeneratedResolverGetFormatterHelper()
         {
-            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(10)
+            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(7)
             {
                 { typeof((float x, float y)), 0 },
                 { typeof(global::CatEscape.Network.GamePacket.PlayerRole), 1 },
                 { typeof(global::CatEscape.Network.PacketType), 2 },
                 { typeof(global::CatEscape.Network.ReplyPacket.Reasons), 3 },
                 { typeof(global::CatEscape.Network.IPacket), 4 },
-                { typeof(global::CatEscape.Network.CountdownPacket), 5 },
-                { typeof(global::CatEscape.Network.GamePacket), 6 },
-                { typeof(global::CatEscape.Network.InfoPacket), 7 },
-                { typeof(global::CatEscape.Network.ReplyPacket), 8 },
-                { typeof(global::CatEscape.Network.TimerPacket), 9 },
+                { typeof(global::CatEscape.Network.GamePacket), 5 },
+                { typeof(global::CatEscape.Network.ReplyPacket), 6 },
             };
         }
 
@@ -79,11 +76,8 @@ namespace MessagePack.Resolvers
                 case 2: return new MessagePack.Formatters.CatEscape.Network.PacketTypeFormatter();
                 case 3: return new MessagePack.Formatters.CatEscape.Network.ReplyPacket_ReasonsFormatter();
                 case 4: return new MessagePack.Formatters.CatEscape.Network.IPacketFormatter();
-                case 5: return new MessagePack.Formatters.CatEscape.Network.CountdownPacketFormatter();
-                case 6: return new MessagePack.Formatters.CatEscape.Network.GamePacketFormatter();
-                case 7: return new MessagePack.Formatters.CatEscape.Network.InfoPacketFormatter();
-                case 8: return new MessagePack.Formatters.CatEscape.Network.ReplyPacketFormatter();
-                case 9: return new MessagePack.Formatters.CatEscape.Network.TimerPacketFormatter();
+                case 5: return new MessagePack.Formatters.CatEscape.Network.GamePacketFormatter();
+                case 6: return new MessagePack.Formatters.CatEscape.Network.ReplyPacketFormatter();
                 default: return null;
             }
         }
@@ -196,21 +190,15 @@ namespace MessagePack.Formatters.CatEscape.Network
 
         public IPacketFormatter()
         {
-            this.typeToKeyAndJumpMap = new Dictionary<RuntimeTypeHandle, KeyValuePair<int, int>>(5, global::MessagePack.Internal.RuntimeTypeHandleEqualityComparer.Default)
+            this.typeToKeyAndJumpMap = new Dictionary<RuntimeTypeHandle, KeyValuePair<int, int>>(2, global::MessagePack.Internal.RuntimeTypeHandleEqualityComparer.Default)
             {
-                { typeof(global::CatEscape.Network.InfoPacket).TypeHandle, new KeyValuePair<int, int>(0, 0) },
-                { typeof(global::CatEscape.Network.GamePacket).TypeHandle, new KeyValuePair<int, int>(1, 1) },
-                { typeof(global::CatEscape.Network.ReplyPacket).TypeHandle, new KeyValuePair<int, int>(2, 2) },
-                { typeof(global::CatEscape.Network.CountdownPacket).TypeHandle, new KeyValuePair<int, int>(3, 3) },
-                { typeof(global::CatEscape.Network.TimerPacket).TypeHandle, new KeyValuePair<int, int>(4, 4) },
+                { typeof(global::CatEscape.Network.GamePacket).TypeHandle, new KeyValuePair<int, int>(0, 0) },
+                { typeof(global::CatEscape.Network.ReplyPacket).TypeHandle, new KeyValuePair<int, int>(1, 1) },
             };
-            this.keyToJumpMap = new Dictionary<int, int>(5)
+            this.keyToJumpMap = new Dictionary<int, int>(2)
             {
                 { 0, 0 },
                 { 1, 1 },
-                { 2, 2 },
-                { 3, 3 },
-                { 4, 4 },
             };
         }
 
@@ -224,19 +212,10 @@ namespace MessagePack.Formatters.CatEscape.Network
                 switch (keyValuePair.Value)
                 {
                     case 0:
-                        options.Resolver.GetFormatterWithVerify<global::CatEscape.Network.InfoPacket>().Serialize(ref writer, (global::CatEscape.Network.InfoPacket)value, options);
-                        break;
-                    case 1:
                         options.Resolver.GetFormatterWithVerify<global::CatEscape.Network.GamePacket>().Serialize(ref writer, (global::CatEscape.Network.GamePacket)value, options);
                         break;
-                    case 2:
+                    case 1:
                         options.Resolver.GetFormatterWithVerify<global::CatEscape.Network.ReplyPacket>().Serialize(ref writer, (global::CatEscape.Network.ReplyPacket)value, options);
-                        break;
-                    case 3:
-                        options.Resolver.GetFormatterWithVerify<global::CatEscape.Network.CountdownPacket>().Serialize(ref writer, (global::CatEscape.Network.CountdownPacket)value, options);
-                        break;
-                    case 4:
-                        options.Resolver.GetFormatterWithVerify<global::CatEscape.Network.TimerPacket>().Serialize(ref writer, (global::CatEscape.Network.TimerPacket)value, options);
                         break;
                     default:
                         break;
@@ -272,19 +251,10 @@ namespace MessagePack.Formatters.CatEscape.Network
             switch (key)
             {
                 case 0:
-                    result = (global::CatEscape.Network.IPacket)options.Resolver.GetFormatterWithVerify<global::CatEscape.Network.InfoPacket>().Deserialize(ref reader, options);
-                    break;
-                case 1:
                     result = (global::CatEscape.Network.IPacket)options.Resolver.GetFormatterWithVerify<global::CatEscape.Network.GamePacket>().Deserialize(ref reader, options);
                     break;
-                case 2:
+                case 1:
                     result = (global::CatEscape.Network.IPacket)options.Resolver.GetFormatterWithVerify<global::CatEscape.Network.ReplyPacket>().Deserialize(ref reader, options);
-                    break;
-                case 3:
-                    result = (global::CatEscape.Network.IPacket)options.Resolver.GetFormatterWithVerify<global::CatEscape.Network.CountdownPacket>().Deserialize(ref reader, options);
-                    break;
-                case 4:
-                    result = (global::CatEscape.Network.IPacket)options.Resolver.GetFormatterWithVerify<global::CatEscape.Network.TimerPacket>().Deserialize(ref reader, options);
                     break;
                 default:
                     reader.Skip();
@@ -330,78 +300,6 @@ namespace MessagePack.Formatters.CatEscape.Network
     using System;
     using System.Buffers;
     using MessagePack;
-
-    public sealed class CountdownPacketFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::CatEscape.Network.CountdownPacket>
-    {
-
-        public void Serialize(ref MessagePackWriter writer, global::CatEscape.Network.CountdownPacket value, global::MessagePack.MessagePackSerializerOptions options)
-        {
-            if (value == null)
-            {
-                writer.WriteNil();
-                return;
-            }
-
-            IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(5);
-            formatterResolver.GetFormatterWithVerify<global::CatEscape.Network.PacketType>().Serialize(ref writer, value.Type, options);
-            writer.Write(value.Id);
-            formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.Name, options);
-            writer.Write(value.IsHost);
-            writer.Write(value.Countdown);
-        }
-
-        public global::CatEscape.Network.CountdownPacket Deserialize(ref MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
-        {
-            if (reader.TryReadNil())
-            {
-                return null;
-            }
-
-            options.Security.DepthStep(ref reader);
-            IFormatterResolver formatterResolver = options.Resolver;
-            var length = reader.ReadArrayHeader();
-            var __Type__ = default(global::CatEscape.Network.PacketType);
-            var __Id__ = default(int);
-            var __Name__ = default(string);
-            var __IsHost__ = default(bool);
-            var __Countdown__ = default(int);
-
-            for (int i = 0; i < length; i++)
-            {
-                switch (i)
-                {
-                    case 0:
-                        __Type__ = formatterResolver.GetFormatterWithVerify<global::CatEscape.Network.PacketType>().Deserialize(ref reader, options);
-                        break;
-                    case 1:
-                        __Id__ = reader.ReadInt32();
-                        break;
-                    case 2:
-                        __Name__ = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
-                        break;
-                    case 3:
-                        __IsHost__ = reader.ReadBoolean();
-                        break;
-                    case 4:
-                        __Countdown__ = reader.ReadInt32();
-                        break;
-                    default:
-                        reader.Skip();
-                        break;
-                }
-            }
-
-            var ____result = new global::CatEscape.Network.CountdownPacket();
-            ____result.Type = __Type__;
-            ____result.Id = __Id__;
-            ____result.Name = __Name__;
-            ____result.IsHost = __IsHost__;
-            ____result.Countdown = __Countdown__;
-            reader.Depth--;
-            return ____result;
-        }
-    }
 
     public sealed class GamePacketFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::CatEscape.Network.GamePacket>
     {
@@ -493,72 +391,6 @@ namespace MessagePack.Formatters.CatEscape.Network
         }
     }
 
-    public sealed class InfoPacketFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::CatEscape.Network.InfoPacket>
-    {
-
-        public void Serialize(ref MessagePackWriter writer, global::CatEscape.Network.InfoPacket value, global::MessagePack.MessagePackSerializerOptions options)
-        {
-            if (value == null)
-            {
-                writer.WriteNil();
-                return;
-            }
-
-            IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(4);
-            formatterResolver.GetFormatterWithVerify<global::CatEscape.Network.PacketType>().Serialize(ref writer, value.Type, options);
-            writer.Write(value.Id);
-            formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.Name, options);
-            writer.Write(value.IsHost);
-        }
-
-        public global::CatEscape.Network.InfoPacket Deserialize(ref MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
-        {
-            if (reader.TryReadNil())
-            {
-                return null;
-            }
-
-            options.Security.DepthStep(ref reader);
-            IFormatterResolver formatterResolver = options.Resolver;
-            var length = reader.ReadArrayHeader();
-            var __Type__ = default(global::CatEscape.Network.PacketType);
-            var __Id__ = default(int);
-            var __Name__ = default(string);
-            var __IsHost__ = default(bool);
-
-            for (int i = 0; i < length; i++)
-            {
-                switch (i)
-                {
-                    case 0:
-                        __Type__ = formatterResolver.GetFormatterWithVerify<global::CatEscape.Network.PacketType>().Deserialize(ref reader, options);
-                        break;
-                    case 1:
-                        __Id__ = reader.ReadInt32();
-                        break;
-                    case 2:
-                        __Name__ = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
-                        break;
-                    case 3:
-                        __IsHost__ = reader.ReadBoolean();
-                        break;
-                    default:
-                        reader.Skip();
-                        break;
-                }
-            }
-
-            var ____result = new global::CatEscape.Network.InfoPacket();
-            ____result.Type = __Type__;
-            ____result.Id = __Id__;
-            ____result.Name = __Name__;
-            ____result.IsHost = __IsHost__;
-            reader.Depth--;
-            return ____result;
-        }
-    }
-
     public sealed class ReplyPacketFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::CatEscape.Network.ReplyPacket>
     {
 
@@ -632,79 +464,6 @@ namespace MessagePack.Formatters.CatEscape.Network
             ____result.IsHost = __IsHost__;
             ____result.Result = __Result__;
             ____result.Reason = __Reason__;
-            reader.Depth--;
-            return ____result;
-        }
-    }
-
-    public sealed class TimerPacketFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::CatEscape.Network.TimerPacket>
-    {
-
-        public void Serialize(ref MessagePackWriter writer, global::CatEscape.Network.TimerPacket value, global::MessagePack.MessagePackSerializerOptions options)
-        {
-            if (value == null)
-            {
-                writer.WriteNil();
-                return;
-            }
-
-            IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(6);
-            formatterResolver.GetFormatterWithVerify<global::CatEscape.Network.PacketType>().Serialize(ref writer, value.Type, options);
-            writer.Write(value.Id);
-            formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.Name, options);
-            writer.WriteNil();
-            writer.Write(value.IsHost);
-            writer.Write(value.Time);
-        }
-
-        public global::CatEscape.Network.TimerPacket Deserialize(ref MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
-        {
-            if (reader.TryReadNil())
-            {
-                return null;
-            }
-
-            options.Security.DepthStep(ref reader);
-            IFormatterResolver formatterResolver = options.Resolver;
-            var length = reader.ReadArrayHeader();
-            var __Type__ = default(global::CatEscape.Network.PacketType);
-            var __Id__ = default(int);
-            var __Name__ = default(string);
-            var __IsHost__ = default(bool);
-            var __Time__ = default(int);
-
-            for (int i = 0; i < length; i++)
-            {
-                switch (i)
-                {
-                    case 0:
-                        __Type__ = formatterResolver.GetFormatterWithVerify<global::CatEscape.Network.PacketType>().Deserialize(ref reader, options);
-                        break;
-                    case 1:
-                        __Id__ = reader.ReadInt32();
-                        break;
-                    case 2:
-                        __Name__ = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
-                        break;
-                    case 4:
-                        __IsHost__ = reader.ReadBoolean();
-                        break;
-                    case 5:
-                        __Time__ = reader.ReadInt32();
-                        break;
-                    default:
-                        reader.Skip();
-                        break;
-                }
-            }
-
-            var ____result = new global::CatEscape.Network.TimerPacket();
-            ____result.Type = __Type__;
-            ____result.Id = __Id__;
-            ____result.Name = __Name__;
-            ____result.IsHost = __IsHost__;
-            ____result.Time = __Time__;
             reader.Depth--;
             return ____result;
         }
