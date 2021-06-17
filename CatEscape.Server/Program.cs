@@ -11,7 +11,6 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var server = new GameServer(port);
-var game = new Game(server);
 
 var stopCommandTask = Task.Run(() =>
 {
@@ -27,6 +26,4 @@ var stopCommandTask = Task.Run(() =>
 });
 
 var runTask = server.RunAsync();
-var gameTask = game.RunAsync();
-
 await Task.WhenAny(runTask, stopCommandTask);

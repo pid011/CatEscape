@@ -18,10 +18,6 @@ namespace CatEscape.Server
         private readonly UdpClient _server;
         private readonly ConcurrentDictionary<int, ServerPlayer> _players = new();
         private readonly ConcurrentQueue<(IPEndPoint, IPacket)> _packets = new();
-        // private readonly object _socketLock = new();
-
-        public event EventHandler<PlayerEventArgs> PlayerJoin;
-        public event EventHandler<PlayerEventArgs> PlayerDisconnect;
 
         public IReadOnlyDictionary<int, ServerPlayer> Players => _players;
 
